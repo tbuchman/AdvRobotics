@@ -1,0 +1,33 @@
+<launch>
+	<node name="grid_mapping" pkg="costmap_2d" type="costmap_2d_node">
+<!--		<rosparam file="$(find grid_mapping)/example_params.yaml" command="load" ns="costmap" /> -->
+		<param name="costmap/publish_frequency" value="1" />
+		<param name="costmap/rolling_window" value="false" />
+		<param name="costmap/static_map" value="false" />
+		<param name="costmap/map_type" value="costmap_2d" />
+		<param name="costmap/track_unknown_space" value="true" />
+		<param name="costmap/global_frame" value="/world" />
+		<param name="costmap/robot_base_frame" value="/girona500_RAUVI" />
+		<param name="costmap/width" value="50" />
+		<param name="costmap/height" value="50" />
+		<param name="costmap/origin_x" value="-25" />
+		<param name="costmap/origin_y" value="-25" />
+		<param name="costmap/observation_sources" value="multibeam" />
+		<param name="costmap/raytrace_range" value="10" />
+		<param name="costmap/obstacle_range" value="10" />
+
+		<param name="costmap/inflation_layer/enabled" value="false" />
+
+
+		<param name="costmap/multibeam/topic" value="/girona500_RAUVI/multibeam" />
+		<param name="costmap/multibeam/expected_update_rate" value="1.0" />
+		<param name="costmap/multibeam/data_type" value="LaserScan" />
+		<param name="costmap/multibeam/clearing" value="true" />
+		<param name="costmap/multibeam/marking" value="true" />
+		<param name="costmap/multibeam/obstacle_range" value="10" />
+		<param name="costmap/multibeam/raytrace_range" value="10" />
+		<param name="costmap/multibeam/max_obstacle_height" value="30" />
+		<param name="costmap/multibeam/min_obstacle_height" value="-30" />
+		<param name="costmap/max_obstacle_height" value="30" /> -->
+	</node>
+</launch>

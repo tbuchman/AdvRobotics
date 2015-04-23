@@ -1,0 +1,5 @@
+<launch>
+	<node name="path_planner" pkg="uwsim" type="uwsim_node">
+<!--		<rosparam file="$(find grid_mapping)/example_params.yaml" command="load" ns="costmap" /> -->
+	</node>
+</launch>
