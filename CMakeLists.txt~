@@ -111,11 +111,7 @@ add_executable(path_planner_straight_heuristic src/path_planner_straight_heurist
 # add_dependencies(uwsim_node uwsim_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(path_planner_closest_unexplored_point
-   ${catkin_LIBRARIES}
-)
-
-target_link_libraries(path_planner_straight_heuristic
+target_link_libraries(path_planner
    ${catkin_LIBRARIES}
 )
 
