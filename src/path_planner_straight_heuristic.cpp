@@ -1,14 +1,27 @@
+/**
+ * 
+ * 
+ * @file path_planner_straight_heuristic.cpp
+ * 
+ * @brief node to implement the "go straight && avoid with min cost" heuristic (idea no.3 in the exploration task solutions paper)
+ * @author Petre Munteanu, clasianvmk (at) gmail (dot) com
+ * 
+ * 
+ * 
+ */
 #include "ros/ros.h"
-#include "std_msgs/String.h"
+#include "constants.h"
+#include "nav_msgs/OccupancyGrid.h"
+#include "geometry_msgs/PoseStamped.h"
 
-void digestOccupancyGrid()
+void digestOccupancyGrid(const nav_msgs/OccupancyGrid)
 {
     ROS_INFO("I heard of an OccupancyGrid");
 }
 
 void digestPoseStamped()
 {
-    ROS_INFO("I heard PoseStamped");
+    ROS_INFO("I heard of a PoseStamped");
 }
 
 int main(int argc, char **argv)
