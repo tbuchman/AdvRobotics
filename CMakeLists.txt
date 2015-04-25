@@ -113,10 +113,10 @@ include_directories(
 # )
 
 ## Declare cpp executables
-#add_executable(path_planner_closest_unexplored_point src/path_planner_closest_unexplored_point.cpp)
-#target_link_libraries(path_planner_closest_unexplored_point
-#   ${catkin_LIBRARIES}
-#)
+add_executable(path_planner_closest_unexplored_point src/path_planner_closest_unexplored_point.cpp)
+target_link_libraries(path_planner_closest_unexplored_point
+   ${catkin_LIBRARIES}
+)
 #add_dependencies(path_planner_closest_unexplored_point ${catkin_EXPORTED_TARGETS})
 
 
