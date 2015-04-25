@@ -8,6 +8,9 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  nav_msgs
+  geometry_msgs
+  genmsg
 )
 
 ## System dependencies are found with CMake's conventions
@@ -70,6 +73,13 @@ find_package(catkin REQUIRED COMPONENTS
 #   std_msgs
 # )
 
+## Declare ROS messages and services
+#add_message_files(FILES Messages.msg)
+#add_service_files(FILES Services.srv)
+
+## Generate added messages and services
+generate_messages(DEPENDENCIES std_msgs nav_msgs geometry_msgs)
+
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -102,22 +112,19 @@ include_directories(
 #   src/${PROJECT_NAME}/uwsim.cpp
 # )
 
-## Declare a cpp executable
+## Declare cpp executables
 add_executable(path_planner_closest_unexplored_point src/path_planner_closest_unexplored_point.cpp)
-add_executable(path_planner_straight_heuristic src/path_planner_straight_heuristic.cpp)
-
-## Add cmake target dependencies of the executable/library
-## as an example, message headers may need to be generated before nodes
-# add_dependencies(uwsim_node uwsim_generate_messages_cpp)
-
-## Specify libraries to link a library or executable target against
 target_link_libraries(path_planner_closest_unexplored_point
    ${catkin_LIBRARIES}
 )
+add_dependencies(path_planner_closest_unexplored_point ${catkin_EXPORTED_TARGETS})
 
+
+add_executable(path_planner_straight_heuristic src/path_planner_straight_heuristic.cpp)
 target_link_libraries(path_planner_straight_heuristic
    ${catkin_LIBRARIES}
 )
+add_dependencies(path_planner_straight_heuristic ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##
