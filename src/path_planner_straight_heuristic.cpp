@@ -29,22 +29,27 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "path_planner_straight_heuristic");
     ros::NodeHandle n;
-    ros::Publisher pubOdometry = n.advertise<nav_msgs::Odometry>("nav_msgs/Odometry", 1032);
-
-    ros::Rate loop_rate(100);
-
+    ros::Publisher pubOdometry = n.advertise<nav_msgs::Odometry>("/dataNavigator_G500RAUVI", 1032);
+//    ros::Rate loop_rate(100);
     ros::Subscriber subOccupancyGrid = n.subscribe("nav_msgs/OccupancyGrid",    1032, digestOccupancyGrid);
     ros::Subscriber subPoseStamped   = n.subscribe("geometry_msgs/PoseStamped", 1032, digestPoseStamped);
 
-
-//    int count = 0;
     while (ros::ok())
     {
-//        pubOdometry.publish(odometryCommand);
-        ros::spinOnce();
-        loop_rate.sleep();
-//        ++count;
-    }
+        std::cout << "Introduce the 6 values:\n";
+        double x, y, z, rx, ry, rz;
+        std::cin >> x >> y >> z >> rx >> ry >> rz;
+        nav_msgs::Odometry odometryCommand;
+        odometryCommand.twist.twist.linear.x  =  x;
+        odometryCommand.twist.twist.linear.y  =  y;
+        odometryCommand.twist.twist.linear.z  =  z;
+        odometryCommand.twist.twist.angular.x = rx;
+        odometryCommand.twist.twist.angular.y = ry;
+        odometryCommand.twist.twist.angular.z = rz;
 
+        pubOdometry.publish(odometryCommand);
+//        ros::spinOnce();
+//        loop_rate.sleep();
+    }
     return 0;
 }

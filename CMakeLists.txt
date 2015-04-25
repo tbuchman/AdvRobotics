@@ -117,7 +117,7 @@ add_executable(path_planner_closest_unexplored_point src/path_planner_closest_un
 target_link_libraries(path_planner_closest_unexplored_point
    ${catkin_LIBRARIES}
 )
-add_dependencies(path_planner_closest_unexplored_point ${catkin_EXPORTED_TARGETS})
+#add_dependencies(path_planner_closest_unexplored_point ${catkin_EXPORTED_TARGETS})
 
 
 add_executable(path_planner_straight_heuristic src/path_planner_straight_heuristic.cpp)
