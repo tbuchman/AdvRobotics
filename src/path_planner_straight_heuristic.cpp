@@ -9,6 +9,8 @@
  * 
  * 
  */
+
+#include <vector>
 #include "ros/ros.h"
 #include "constants.h"
 #include "nav_msgs/Odometry.h"
@@ -18,11 +20,24 @@
 void digestOccupancyGrid(const nav_msgs::OccupancyGrid::ConstPtr& map)
 {
     ROS_INFO("I heard of an OccupancyGrid");
+    unsigned int width  = map->info.width;
+    unsigned int height = map->info.height;
+    geometry_msgs::Pose origin = map->info.origin;
+
+    const std::vector<signed char> data = map->data;
 }
 
 void digestPoseStamped(const geometry_msgs::PoseStamped::ConstPtr& pose)
 {
     ROS_INFO("I heard of a PoseStamped");
+    double posx = pose->pose.position.x;
+    double posy = pose->pose.position.y;
+    double posz = pose->pose.position.z;
+    
+    double orix = pose->pose.orientation.x;
+    double oriy = pose->pose.orientation.y;
+    double oriz = pose->pose.orientation.z;
+    double oriw = pose->pose.orientation.w;
 }
 
 int main(int argc, char **argv)
