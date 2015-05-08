@@ -17,11 +17,15 @@
 
 #define DEFAULT_MAX_SPEED 1.69
 #define DEFAULT_MAX_ROTATIONAL_SPEED 1.69
-#define DEFAULT_LOOP_RATE 10
+#define DEFAULT_LOOP_RATE 1000
+#define DEFAULT_PI 3.14159265358979323846264338327950288419717
+#define DEFAULT_SAFE_DIST_WEIGHT (369./10000.) // 3.69% of the maximum range is considered as safety distance (braking distance) 
 
-const double MAX_ROTATIONAL_SPEED = DEFAULT_MAX_ROTATIONAL_SPEED;
-const double MAX_SPEED = DEFAULT_MAX_SPEED;
 const int LOOP_RATE = DEFAULT_LOOP_RATE;
+const double PI = DEFAULT_PI;
+const double MAX_SPEED = DEFAULT_MAX_SPEED;
+const double SAFE_DIST_WEIGHT = DEFAULT_SAFE_DIST_WEIGHT;
+const double MAX_ROTATIONAL_SPEED = DEFAULT_MAX_ROTATIONAL_SPEED;
 
 typedef std::vector<std::vector <signed char> > OccupancyMap;
 
