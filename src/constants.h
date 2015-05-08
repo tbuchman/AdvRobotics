@@ -8,8 +8,10 @@
  * @author Georgian Besleaga, Tyler Irving Buchman, Petre Munteanu, Jacobs University Bremen, g (dot) besleaga (at) jacobs-university (dot) de, t (dot) buchman (at) jacobs-university (dot) de, p (dot) munteanu (at) jacobs-university (dot) de
  */
 #include <cmath>
+#include <vector>
 #include "ros/ros.h"
 #include "nav_msgs/Odometry.h"
+#include <boost/thread/mutex.hpp>
 #include "nav_msgs/OccupancyGrid.h"
 #include "geometry_msgs/PoseStamped.h"
 
@@ -20,6 +22,25 @@
 const double MAX_ROTATIONAL_SPEED = DEFAULT_MAX_ROTATIONAL_SPEED;
 const double MAX_SPEED = DEFAULT_MAX_SPEED;
 const int LOOP_RATE = DEFAULT_LOOP_RATE;
+
+typedef std::vector<std::vector <signed char> > OccupancyMap;
+
+void updateMap(const std::vector<signed char> &data, unsigned int width, unsigned int height, OccupancyMap &occMap, boost::mutex &mutex)
+{
+    boost::mutex::scoped_lock scoped_lock(mutex);
+    occMap.clear();
+    int index = 0;
+    std::vector<signed char> row;
+    for(int i = 0; i < height; ++i)
+    {
+        for(int j = 0; j < width; ++j)
+        {
+            row.push_back(data[index++]);
+        }
+        occMap.push_back(row);
+        row.clear();
+    }
+}
 
 /// the maths sgn/signum function
 template <typename T> int sgn(T val)

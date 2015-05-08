@@ -14,8 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(Boost REQUIRED COMPONENTS system)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -78,7 +77,7 @@ find_package(catkin REQUIRED COMPONENTS
 #add_service_files(FILES Services.srv)
 
 ## Generate added messages and services
-generate_messages(DEPENDENCIES std_msgs nav_msgs geometry_msgs)
+#generate_messages(DEPENDENCIES std_msgs nav_msgs geometry_msgs)
 
 ###################################
 ## catkin specific configuration ##
@@ -122,7 +121,7 @@ add_dependencies(path_planner_closest_unexplored_point ${catkin_EXPORTED_TARGETS
 
 add_executable(path_planner_straight_heuristic src/path_planner_straight_heuristic.cpp)
 target_link_libraries(path_planner_straight_heuristic
-   ${catkin_LIBRARIES}
+   ${catkin_LIBRARIES} #${CMAKE_THREAD_LIBS_INIT}
 )
 add_dependencies(path_planner_straight_heuristic ${catkin_EXPORTED_TARGETS})
 
