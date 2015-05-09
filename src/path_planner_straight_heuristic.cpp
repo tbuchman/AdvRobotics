@@ -25,6 +25,7 @@
 float angle_min, angle_max, angle_increment, range_min = 0., range_max = 0.;
 std::vector <float> ranges;
 int beams;
+int times_forced = 0;
 
 //void digestOccupancyGrid(const nav_msgs::OccupancyGrid::ConstPtr &map)
 //{
@@ -83,21 +84,48 @@ float average_range(int index)
     return sum / AVERAGING_STREAK;
 }
 
+ros::Publisher pubOdometry; // to be initialized in main() before calling the following function:
+void turn_inplace(ros::Rate r, double loop_rate, bool forced = true, float speed = 0., float sgn = 1.)
+{
+    if(forced)
+    {
+        if(++times_forced > MAX_TIMES_FORCED)
+        {
+            ROS_ERROR("Error: exceeded max no. %d of 180 degrees forced turns. Quitting...", MAX_TIMES_FORCED);
+            ros::shutdown();
+        }
+    }
+    nav_msgs::Odometry odometryCommand;
+    odometryCommand.pose.pose.orientation.w = 1.;
+    odometryCommand.twist.twist.linear.x    = speed;
+    odometryCommand.twist.twist.linear.y    = 0.;
+    odometryCommand.twist.twist.linear.z    = 0.;
+    odometryCommand.twist.twist.angular.x   = 0.;
+    odometryCommand.twist.twist.angular.y   = 0.;
+    odometryCommand.twist.twist.angular.z   = sgn * PI/2.;
+
+    ROS_INFO("forced full turn no. %d | no. of complete-spin iterations SECONDS_TOTURN * LOOP_RATE = %d", times_forced, (int)(SECONDS_TOTURN * (double)LOOP_RATE));
+    for(int i = (int) (SECONDS_TOTURN * loop_rate); i > 0 && ros::ok(); --i)
+    {
+        pubOdometry.publish(odometryCommand);
+        ros::spinOnce();
+        r.sleep();
+    }
+}
+
 /// The robot avoids obstacles with a minimum effort and keeps on going with no stop performing 2D exploration
 /// NOTE: it is assumed that the robot is initially aligned with the to-be-explored 2D plane
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "path_planner_straight_heuristic");
     ros::NodeHandle n;
-    ros::Publisher pubOdometry = n.advertise<nav_msgs::Odometry>("/dataNavigator_G500RAUVI", 1032);
+    pubOdometry = n.advertise<nav_msgs::Odometry>("/dataNavigator_G500RAUVI", 1032);
     ros::Rate loop_rate(LOOP_RATE);
 //    ros::Subscriber subOccupancyGrid = n.subscribe("/grid_mapping/costmap/costmap", 1032, digestOccupancyGrid);
 //    ros::Subscriber subPoseStamped   = n.subscribe("/uwsim/girona500_odom_RAUVI", 1032, digestPoseStampedOffOdometry);
     ros::Subscriber subLaserScan     = n.subscribe("/girona500_RAUVI/multibeam", 1032, digestLaserScan);
 
-    
-    int times_forced = 0;
-    float to_turn;
+    double to_turn;
     while (ros::ok())
     {
         if(ranges.size())
@@ -111,8 +139,9 @@ int main(int argc, char **argv)
             }
             nav_msgs::Odometry odometryCommand;
             int half_range = beams >> 1;
-            int target_index;
+            int target_index = -1;
             float range_averaged = average_range(half_range);
+            // going straight until next obstacle
             if(range_averaged >= SAFE_DIST_WEIGHT * range_max && range_averaged <= range_max)
             {
                 odometryCommand.pose.pose.orientation.w = 1.;
@@ -123,18 +152,18 @@ int main(int argc, char **argv)
                 odometryCommand.twist.twist.angular.y   = 0.;
                 odometryCommand.twist.twist.angular.z   = 0.;
                 
-                AVERAGING_STREAK = DEFAULT_AVERAGING_STREAK;
                 pubOdometry.publish(odometryCommand);
             }
             else
             {
                 // looking for the closest beam with convenient ranges[] value
-                float target_min = SAFE_DIST_WEIGHT * range_max;
+                double target_min = SAFE_DIST_WEIGHT * range_max;
                 to_turn = 0.;
                 target_index = -1;
-                for(int i = 1; i <= half_range - (AVERAGING_STREAK >> 1); ++i)
+                float current_range_averaged;
+                for(int i = 1 + BEAMS_SKIP; i <= half_range - (AVERAGING_STREAK >> 1); ++i)
                 {
-                    float current_range_averaged = average_range(half_range + i);
+                    current_range_averaged = average_range(half_range + i);
                     if(current_range_averaged >= target_min && current_range_averaged <= range_max)
                     {
                         target_index = half_range + i;
@@ -149,63 +178,16 @@ int main(int argc, char **argv)
                 }
                 if(-1 == target_index)
                 {
-                    // then trying the extremes first
-                    
-                    
-                    // finally turning 180 degrees since the robot got stuck
-                    if(times_forced > MAX_TIMES_FORCED)
-                    {
-                        ROS_ERROR("Error: exceeded max no. %d of 180 degrees forced turns. Quitting...", MAX_TIMES_FORCED);
-                        return 1;
-                    }
-                    to_turn = PI/2.;
-                    int rotational_limit = (int)(SECONDS_TOTURN * (double) LOOP_RATE);
-                    for(int i = 0; i < rotational_limit && ros::ok(); ++i)
-                    {
-                        odometryCommand.pose.pose.orientation.w = 1.;
-                        odometryCommand.twist.twist.linear.x    = 0.;
-                        odometryCommand.twist.twist.linear.y    = 0.;
-                        odometryCommand.twist.twist.linear.z    = 0.;
-                        odometryCommand.twist.twist.angular.x   = 0.;
-                        odometryCommand.twist.twist.angular.y   = 0.;
-                        odometryCommand.twist.twist.angular.z   = to_turn;
-
-                        pubOdometry.publish(odometryCommand);
-                        ros::spinOnce();
-                        loop_rate.sleep();
-                    }
-                    ROS_INFO("forced to turn 180 degrees | time no. %d", times_forced++);
+                    // robot is stuck: turning in-place
+                    turn_inplace(loop_rate, (double)LOOP_RATE);
                 }
                 else
                 {
+                    float speed = range_averaged < CRITICAL_SAFE_DIST_WEIGHT * range_max ? 0. : DEFAULT_MAX_TURN_SPEED;
                     to_turn = (double) (target_index - half_range) * angle_increment;
-                }
-                // start braking (apply. speed 0.0 if critical safety distance is not ensured any more)
-                double speed = SPEED;
-                if(range_averaged < CRITICAL_SAFE_DIST_WEIGHT * range_max)
-                {
-                    speed = 0.;
-                    AVERAGING_STREAK = DEFAULT_CRITICAL_AVERAGING_STREAK;
-                }
-                else
-                {
-                    AVERAGING_STREAK = DEFAULT_AVERAGING_STREAK;
-                }
-
-                // turning
-                for(int i = 0; i < ROTATIONAL_ITERATIONS && ros::ok(); ++i)
-                {
-                    odometryCommand.pose.pose.orientation.w = 1.;
-                    odometryCommand.twist.twist.linear.x    = speed;
-                    odometryCommand.twist.twist.linear.y    = 0.;
-                    odometryCommand.twist.twist.linear.z    = 0.;
-                    odometryCommand.twist.twist.angular.x   = 0.;
-                    odometryCommand.twist.twist.angular.y   = 0.;
-                    odometryCommand.twist.twist.angular.z   = to_turn;
-
-                    pubOdometry.publish(odometryCommand);
-                    ros::spinOnce();
-                    loop_rate.sleep();
+                    turn_inplace(loop_rate, abs(2. * to_turn / PI * (double)LOOP_RATE), false, speed, (float)sgn(to_turn));
+                    ROS_INFO("turning in-place %lf percent of PI/2 to beam ID %d", 2. * to_turn / PI, target_index);
+                    continue;
                 }
             }
             ROS_INFO("threshold range = %f | threshold critical = %f | range found = %f | range best index = %d", SAFE_DIST_WEIGHT * range_max, CRITICAL_SAFE_DIST_WEIGHT * range_max, ranges[half_range], target_index);
