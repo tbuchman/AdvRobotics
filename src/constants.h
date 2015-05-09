@@ -15,21 +15,22 @@
 #include "nav_msgs/OccupancyGrid.h"
 #include "geometry_msgs/PoseStamped.h"
 
-#define DEFAULT_MAX_SPEED 1.69
-#define DEFAULT_MAX_TURN_SPEED 0.69
-#define DEFAULT_MAX_TIMES_FORCED 269
-#define DEFAULT_AVERAGING_STREAK 6 // odd number expected
-#define DEFAULT_CRITICAL_AVERAGING_STREAK 69 // odd number expected
-#define DEFAULT_MAX_ROTATIONAL_SPEED 1.69
-#define DEFAULT_LOOP_RATE 1000
-#define DEFAULT_PI 3.14159265358979323846264338327950288419717
-#define DEFAULT_SAFE_DIST_WEIGHT (569./10000.) // 5.69% of the maximum range is considered as safety distance (braking distance)
-#define DEFAULT_CRITICAL_SAFE_DIST_WEIGHT (269./10000.) // 2.69% of the maximum range is considered as critical safety distance (minimum braking distance)
-#define DEFAULT_SIMPLE_STREAK false
-#define DEFAULT_SECONDS_TOTURN 2.069
-#define DEFAULT_ROTATIONAL_ITERATIONS 169
-#define DEFAULT_BEAMS_SKIP 169
+#define DEFAULT_MAX_SPEED 1.69 // general reference linear cruising speed value
+#define DEFAULT_MAX_TURN_SPEED 0.69 // general reference linear speed value while taking turns
+#define DEFAULT_MAX_TIMES_FORCED 269 // maximum number of 180-degrees turns accepted for a single run (eventually detects infinite loops)
+#define DEFAULT_AVERAGING_STREAK 7 // no of neighbours considered for laser beams values smoothing - odd number expected
+#define DEFAULT_CRITICAL_AVERAGING_STREAK 69 // no of neighbours considered for enhanced laser beams values smoothing - odd number expected
+#define DEFAULT_MAX_ROTATIONAL_SPEED 1.69 // general reference angular speed value
+#define DEFAULT_LOOP_RATE 969 // no. of interactive-loop iterations per second
+#define DEFAULT_PI 3.14159265358979323846264338327950288419717 // mathematical PI constant
+#define DEFAULT_SAFE_DIST_WEIGHT (669./10000.) // 5.69% of the maximum range is considered as safety distance (braking distance)
+#define DEFAULT_CRITICAL_SAFE_DIST_WEIGHT (469./10000.) // 2.69% of the maximum range is considered as critical safety distance (minimum braking distance)
+#define DEFAULT_SIMPLE_STREAK false // true if no smooothing is considered; false otherwise - i.e. smoothing is required 
+#define DEFAULT_SECONDS_TOTURN 2.069 // fine-tuned loop-rate independent time slice needed to turn the robot 180 degrees at the given default speeds
+#define DEFAULT_ROTATIONAL_ITERATIONS 169 // no. of iterations for imposing independent turns (i.e. turns not using the "turn_inplace()" routine)
+#define DEFAULT_BEAMS_SKIP 169 // no. of beams to disregard in the middle - models robot width
 
+/* initializing constants with their respective default values */
 bool SIMPLE_STREAK = DEFAULT_SIMPLE_STREAK;
 const int LOOP_RATE = DEFAULT_LOOP_RATE;
 const int BEAMS_SKIP = DEFAULT_BEAMS_SKIP;
@@ -45,8 +46,17 @@ const double SAFE_DIST_WEIGHT = DEFAULT_SAFE_DIST_WEIGHT;
 const double CRITICAL_SAFE_DIST_WEIGHT = DEFAULT_CRITICAL_SAFE_DIST_WEIGHT;
 const double MAX_ROTATIONAL_SPEED = DEFAULT_MAX_ROTATIONAL_SPEED;
 
+/* datatype for the actual data transmitted through /grid_mapping/costmap/costmap rostopic - models the linear char data[] in a nav_msgs::occupancyGrid instance*/
 typedef std::vector<std::vector <signed char> > OccupancyMap;
 
+/**
+ * @brief updates a given occupancyMap instance to the new data in the provided char data[]
+ * @param data the provided array of chars to update from
+ * @param width known new data width
+ * @param height known new data height
+ * @param occMap occupancyMap instance to update
+ * @param mutex boost mutex instance for proteccting the scop of this routine
+ */
 void updateMap(const std::vector<signed char> &data, unsigned int width, unsigned int height, OccupancyMap &occMap, boost::mutex &mutex)
 {
     boost::mutex::scoped_lock scoped_lock(mutex);
@@ -64,12 +74,13 @@ void updateMap(const std::vector<signed char> &data, unsigned int width, unsigne
     }
 }
 
-/// the maths sgn/signum function
+/// typesafe maths sgn/signum function
 template <typename T> int sgn(T val)
 {
     return (T(0) < val) - (val < T(0));
 }
 
+/// checks (and eventually updates) a given linear speed against the maximum allowed linear speed
 void checkMaxSpeed (double &v)
 {
     double sign = sgn(v);
@@ -79,6 +90,7 @@ void checkMaxSpeed (double &v)
     }
 }
 
+/// checks (and eventually updates) a given angular speed against the maximum allowed angular speed
 void checkMaxRotationalSpeed (double &v)
 {
     double sign = sgn(v);
@@ -88,7 +100,10 @@ void checkMaxRotationalSpeed (double &v)
     }
 }
 
-/// generally useful code from Ravi
+////////////////////////////////////////////////////////////////////////////
+///////    Note: Region start <<generally useful code from Ravi>>   ////////
+////////////////////////////////////////////////////////////////////////////
+
 void mapCellToWorld(const nav_msgs::OccupancyGridConstPtr &map, const int &x_map, const int &y_map, double &x_world, double &y_world)
 {
                 x_world  = (x_map + 0.5) * map->info.resolution + map->info.origin.position.x;
@@ -118,5 +133,9 @@ void mapIndexToWorld(const nav_msgs::OccupancyGridConstPtr &map, size_t index, d
                 mapIndexToCell(map, index, x_map, y_map);
                 mapCellToWorld(map, x_map, y_map, x_world, y_world);
 }
+
+////////////////////////////////////////////////////////////////////////////
+///////    Note: Region ended <<generally useful code from Ravi>>   ////////
+////////////////////////////////////////////////////////////////////////////
 
 #endif /* PATH_PLANNING_CONSTANTS */
