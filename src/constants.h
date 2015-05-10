@@ -26,7 +26,8 @@
 #define DEFAULT_SAFE_DIST_WEIGHT (669./10000.) // 5.69% of the maximum range is considered as safety distance (braking distance)
 #define DEFAULT_CRITICAL_SAFE_DIST_WEIGHT (469./10000.) // 2.69% of the maximum range is considered as critical safety distance (minimum braking distance)
 #define DEFAULT_SIMPLE_STREAK false // true if no smooothing is considered; false otherwise - i.e. smoothing is required 
-#define DEFAULT_SECONDS_TOTURN 2.069 // fine-tuned loop-rate independent time slice needed to turn the robot 180 degrees at the given default speeds
+#define DEFAULT_SECONDS_TOTURN 2.069 // fine-tuned loop-rate independent time slice needed to turn the robot almost 180 degrees at the given default speeds
+#define DEFAULT_SECONDS_TOLEAP 1.669 // fine-tuned loop-rate independent time slice needed to leap the robot ahead back into the map after a full rotation has been ordered to re-orient the robot towards the inside of the map
 #define DEFAULT_ROTATIONAL_ITERATIONS 169 // no. of iterations for imposing independent turns (i.e. turns not using the "turn_inplace()" routine)
 #define DEFAULT_BEAMS_SKIP 169 // no. of beams to disregard in the middle - models robot width
 
@@ -42,6 +43,7 @@ const double SPEED = DEFAULT_MAX_SPEED / 2.;
 const double MAX_SPEED = DEFAULT_MAX_SPEED;
 const double MAX_TURN_SPEED = DEFAULT_MAX_TURN_SPEED;
 const double SECONDS_TOTURN = DEFAULT_SECONDS_TOTURN;
+const double SECONDS_TOLEAP = DEFAULT_SECONDS_TOLEAP;
 const double SAFE_DIST_WEIGHT = DEFAULT_SAFE_DIST_WEIGHT;
 const double CRITICAL_SAFE_DIST_WEIGHT = DEFAULT_CRITICAL_SAFE_DIST_WEIGHT;
 const double MAX_ROTATIONAL_SPEED = DEFAULT_MAX_ROTATIONAL_SPEED;
