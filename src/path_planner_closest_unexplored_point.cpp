@@ -330,10 +330,10 @@ bool find_and_turn_towards_point()
 	}
 	else
 	{
-		angle = atan(deltay / deltax);
+		angle = atan(((float)deltay) / deltax);
 		if(deltax < 0)
 		{
-			angle = ((deltay > 0) ? 1 : -1)*PI + angle;
+			angle = ((float)((deltay > 0) ? 1 : -1)*PI) + angle;
 		}
 	}
 	
@@ -346,7 +346,7 @@ bool find_and_turn_towards_point()
 	float ratio = abs(delta_angle) / PI;
 	float speed = ratio*MAX_TURN_SPEED + (1-ratio)*MAX_SPEED;
 	
-	//delta_angle /= 3;
+	delta_angle *= -1;
 	
 	nav_msgs::Odometry odometryCommand;
 	double percent_turn = 
