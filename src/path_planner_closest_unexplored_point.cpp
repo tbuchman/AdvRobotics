@@ -197,7 +197,7 @@ bool within_map(int robotx, int roboty, int radius)
 
 bool is_frontier(int robotx, int roboty)
 {
-	if(robotx < 5 || roboty < 5 || robotx >= width-5 || roboty >= height-5)
+	if(robotx < 10 || roboty < 10 || robotx >= width-10 || roboty >= height-10)
     {
         return false;
     }
@@ -221,7 +221,7 @@ bool is_best_frontier(int cellx, int celly, int robotx, int roboty, double &best
 	{
 		return false;
 	}
-	else if(mapData[celly*width+cellx] == -1)
+	else if(mapData[celly*width+cellx] == -1) // if unexplored frontier
 	{ 
 		bool no_objects = true;
 		int distance = integral_distance(cellx, celly, robotx, roboty);
@@ -290,17 +290,20 @@ bool find_and_turn_towards_point()
 		
 		if(point_found)
 		{
-			j = best_distance;
-			for(i = (int)j; i >=0; i--)
+			while(j <= best_distance)
 			{
-				is_best_frontier(robotx-i, roboty+j, robotx, roboty, best_distance, bestx, besty);
-				is_best_frontier(robotx+i, roboty+j, robotx, roboty, best_distance, bestx, besty);
-				is_best_frontier(robotx+i, roboty-j, robotx, roboty, best_distance, bestx, besty);
-				is_best_frontier(robotx-i, roboty-j, robotx, roboty, best_distance, bestx, besty);
-				is_best_frontier(robotx-j, roboty+i, robotx, roboty, best_distance, bestx, besty);
-				is_best_frontier(robotx+j, roboty+i, robotx, roboty, best_distance, bestx, besty);
-				is_best_frontier(robotx+j, roboty-i, robotx, roboty, best_distance, bestx, besty);
-				is_best_frontier(robotx-j, roboty-i, robotx, roboty, best_distance, bestx, besty);
+				j++;
+				for(i = (int)j; i >=0; i--)
+				{
+					is_best_frontier(robotx-i, roboty+j, robotx, roboty, best_distance, bestx, besty);
+					is_best_frontier(robotx+i, roboty+j, robotx, roboty, best_distance, bestx, besty);
+					is_best_frontier(robotx+i, roboty-j, robotx, roboty, best_distance, bestx, besty);
+					is_best_frontier(robotx-i, roboty-j, robotx, roboty, best_distance, bestx, besty);
+					is_best_frontier(robotx-j, roboty+i, robotx, roboty, best_distance, bestx, besty);
+					is_best_frontier(robotx+j, roboty+i, robotx, roboty, best_distance, bestx, besty);
+					is_best_frontier(robotx+j, roboty-i, robotx, roboty, best_distance, bestx, besty);
+					is_best_frontier(robotx-j, roboty-i, robotx, roboty, best_distance, bestx, besty);
+				}
 			}
 		}
 	}
@@ -338,7 +341,7 @@ bool find_and_turn_towards_point()
 	}
 	
 	float delta_angle = angle - current_angle;
-	if(abs(delta_angle) > PI)
+	if(delta_angle > PI || (delta_angle*-1) > PI)
 	{
 		delta_angle = ((delta_angle > 0) ? -2 : 2)*PI + delta_angle;
 	}
@@ -360,7 +363,7 @@ bool find_and_turn_towards_point()
 	
 	if(bestx != targetx || besty != targety)
 	{
-    	ROS_INFO("turning towards point %d, %d from point %d, %d with angle %f from angle %f changing by angle %f with radius %d", bestx, besty, robotx, roboty, angle, current_angle, delta_angle, j);
+    	ROS_INFO("turning towards point %d, %d from point %d, %d with angle %f from angle %f changing by angle %f. Quaternion x, y = %f, %f", bestx, besty, robotx, roboty, angle, current_angle, delta_angle, orix, oriy);
     	targetx = bestx;
     	targety = besty;
     }
