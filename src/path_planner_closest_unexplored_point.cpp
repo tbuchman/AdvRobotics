@@ -307,22 +307,12 @@ bool find_and_turn_towards_point()
 	//ROS_INFO("point identified: %d, %d", bestx, besty);
 	
 	float current_angle = 0.;
-	int sign = (oriz < 0) ? -1 : 1;
-	int signw = (oriw < 0) ? -1 : 1;
 	float xcomp = orix * sign;
 	float ycomp = oriy * sign;
-	//current_angle = atan(ycomp / ((xcomp == 0.) ? xcomp+0.00001 : xcomp));
 	
-	current_angle = asin(2*orix*oriy + 2*oriz*oriw);
-	/*
+	current_angle = asin(2*orix*oriy + 2*oriz*oriw); // calculates yaw from quaternion
 	
-	if(xcomp < 0)
-	{
-		current_angle = ((ycomp > 0) ? 1 : -1)*PI + current_angle;
-	}
-	*/
 	// bestx and besty are the coordinates of our target point
-	
 	int deltax = bestx - robotx;
 	int deltay = besty - roboty;
 	float angle = 5.;
