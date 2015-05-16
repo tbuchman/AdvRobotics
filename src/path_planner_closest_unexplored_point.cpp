@@ -307,8 +307,6 @@ bool find_and_turn_towards_point()
 	//ROS_INFO("point identified: %d, %d", bestx, besty);
 	
 	float current_angle = 0.;
-	float xcomp = orix;
-	float ycomp = oriy;
 	
 	current_angle = asin(2*orix*oriy + 2*oriz*oriw); // calculates yaw from quaternion
 	
