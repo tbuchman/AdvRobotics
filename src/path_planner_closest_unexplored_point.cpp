@@ -308,14 +308,19 @@ bool find_and_turn_towards_point()
 	
 	float current_angle = 0.;
 	int sign = (oriz < 0) ? -1 : 1;
+	int signw = (oriw < 0) ? -1 : 1;
 	float xcomp = orix * sign;
 	float ycomp = oriy * sign;
-	current_angle = atan(ycomp / ((xcomp == 0.) ? xcomp+0.00001 : xcomp));
+	//current_angle = atan(ycomp / ((xcomp == 0.) ? xcomp+0.00001 : xcomp));
+	
+	current_angle = asin(2*orix*oriy + 2*oriz*oriw);
+	/*
+	
 	if(xcomp < 0)
 	{
 		current_angle = ((ycomp > 0) ? 1 : -1)*PI + current_angle;
 	}
-	
+	*/
 	// bestx and besty are the coordinates of our target point
 	
 	int deltax = bestx - robotx;
@@ -357,7 +362,7 @@ bool find_and_turn_towards_point()
 	
 	if(bestx != targetx || besty != targety)
 	{
-    	ROS_INFO("turning towards point %d, %d from point %d, %d with angle %f from angle %f changing by angle %f. Quaternion x, y = %f, %f. Moving at speed %f", bestx, besty, robotx, roboty, angle, current_angle, delta_angle, xcomp, ycomp, speed);
+    	ROS_INFO("turning towards point %d, %d from point %d, %d with angle %f from angle %f changing by angle %f. Quaternion x, y, z, w = %f, %f, %f, %f. Moving at speed %f", bestx, besty, robotx, roboty, angle, current_angle, delta_angle, orix, oriy, oriz, oriw, speed);
     	targetx = bestx;
     	targety = besty;
     }
