@@ -195,15 +195,6 @@ bool within_map(int robotx, int roboty, int radius)
     return false;
 }
 
-bool is_frontier(int robotx, int roboty)
-{
-	if(robotx < 10 || roboty < 10 || robotx >= width-10 || roboty >= height-10)
-    {
-        return false;
-    }
-    return true;
-}
-
 int integral_distance(int x1, int y1, int x2, int y2)
 {
 	return (int)(sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2)) + 0.5); // gets distance between x1 and x2 rounded to the nearest int
@@ -316,10 +307,13 @@ bool find_and_turn_towards_point()
 	//ROS_INFO("point identified: %d, %d", bestx, besty);
 	
 	float current_angle = 0.;
-	current_angle = atan(oriy / ((orix == 0.) ? orix+0.00001 : orix));
-	if(orix < 0)
+	int sign = (oriz < 0) ? -1 : 1;
+	float xcomp = orix * sign;
+	float ycomp = oriy * sign;
+	current_angle = atan(ycomp / ((xcomp == 0.) ? xcomp+0.00001 : xcomp));
+	if(xcomp < 0)
 	{
-		current_angle = ((oriy > 0) ? 1 : -1)*PI + current_angle;
+		current_angle = ((ycomp > 0) ? 1 : -1)*PI + current_angle;
 	}
 	
 	// bestx and besty are the coordinates of our target point
@@ -349,7 +343,7 @@ bool find_and_turn_towards_point()
 	float ratio = abs(delta_angle) / PI;
 	float speed = ratio*MAX_TURN_SPEED + (1-ratio)*MAX_SPEED;
 	
-	//delta_angle *= -1;
+	delta_angle *= -1;
 	
 	nav_msgs::Odometry odometryCommand;
 	double percent_turn = 
@@ -363,7 +357,7 @@ bool find_and_turn_towards_point()
 	
 	if(bestx != targetx || besty != targety)
 	{
-    	ROS_INFO("turning towards point %d, %d from point %d, %d with angle %f from angle %f changing by angle %f. Quaternion x, y = %f, %f", bestx, besty, robotx, roboty, angle, current_angle, delta_angle, orix, oriy);
+    	ROS_INFO("turning towards point %d, %d from point %d, %d with angle %f from angle %f changing by angle %f. Quaternion x, y = %f, %f. Moving at speed %f", bestx, besty, robotx, roboty, angle, current_angle, delta_angle, xcomp, ycomp, speed);
     	targetx = bestx;
     	targety = besty;
     }
