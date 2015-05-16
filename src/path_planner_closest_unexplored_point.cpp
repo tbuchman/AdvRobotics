@@ -346,7 +346,7 @@ bool find_and_turn_towards_point()
 	float ratio = abs(delta_angle) / PI;
 	float speed = ratio*MAX_TURN_SPEED + (1-ratio)*MAX_SPEED;
 	
-	delta_angle *= -1;
+	//delta_angle *= -1;
 	
 	nav_msgs::Odometry odometryCommand;
 	double percent_turn = 
